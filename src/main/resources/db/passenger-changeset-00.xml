@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.3.xsd">
+
+    <changeSet id="1" author="Alina">
+        <createTable tableName="passengers">
+            <column name="id" type="bigserial" autoIncrement="true">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="survived" type="boolean"/>
+            <column name="p_class" type="varchar(10)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="varchar(255)"/>
+            <column name="sex" type="varchar(10)"/>
+            <column name="age" type="double precision"/>
+            <column name="siblings_spouses" type="integer"/>
+            <column name="parents_children" type="integer"/>
+            <column name="fare" type="double precision"/>
+        </createTable>
+    </changeSet>
+
+</databaseChangeLog>
