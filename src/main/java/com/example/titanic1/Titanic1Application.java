@@ -6,7 +6,6 @@ import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
-@EnableCaching
 public class Titanic1Application {
 
     public static void main(String[] args) {
