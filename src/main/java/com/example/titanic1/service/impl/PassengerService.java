@@ -2,8 +2,15 @@ package com.example.titanic1.service.impl;
 
 import com.example.titanic1.dto.PassengerEntityDto;
 import com.example.titanic1.dto.PassengerStatistics;
+import com.example.titanic1.mapper.PassengerMapper;
 import com.example.titanic1.model.entity.PassengerEntity;
+import com.example.titanic1.model.enums.Gender;
 import com.example.titanic1.repo.PassengerRepository;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
@@ -18,8 +25,14 @@ import java.util.stream.Collectors;
 
 @Service
 public class PassengerService {
+
+    private static final Logger logger = LoggerFactory.getLogger(PassengerService.class);
+
     @Autowired
     private PassengerRepository passengerRepository;
+
+    @Autowired
+    private PassengerMapper passengerMapper;
 
     @Cacheable(value = "passengers", sync = true)
     public Page<PassengerEntityDto> getFilteredAndSortedPassengers(
@@ -27,35 +40,39 @@ public class PassengerService {
             String searchName,
             Boolean survived,
             Boolean adult,
-            String gender,
-            Boolean noRelatives
-    ) {
+            Gender gender,
+            Boolean noRelatives) {
+
         Specification<PassengerEntity> spec = Specification.where(null);
 
-        if (searchName != null && !searchName.isEmpty()) {
-            spec = spec.and(PassengerSpecifications.nameContains(searchName));
-        }
-        if (survived != null) {
-            spec = spec.and(PassengerSpecifications.isSurvived(survived));
-        }
-        if (adult != null) {
-            spec = spec.and(PassengerSpecifications.isAdult(adult));
-        }
-        if (gender != null && !gender.isEmpty()) {
-            spec = spec.and(PassengerSpecifications.hasGender(gender));
-        }
-        if (noRelatives != null) {
-            spec = spec.and(PassengerSpecifications.hasNoRelatives(noRelatives));
-        }
+        spec = Optional.ofNullable(searchName)
+                .filter(s -> !s.isEmpty())
+                .map(PassengerSpecifications::nameContains)
+                .map(spec::and)
+                .orElse(spec);
+        spec = Optional.ofNullable(survived)
+                .map(PassengerSpecifications::isSurvived)
+                .map(spec::and)
+                .orElse(spec);
+        spec = Optional.ofNullable(adult)
+                .map(PassengerSpecifications::isAdult)
+                .map(spec::and)
+                .orElse(spec);
+        spec = Optional.ofNullable(gender)
+                .map(PassengerSpecifications::hasGender)
+                .map(spec::and)
+                .orElse(spec);
+        spec = Optional.ofNullable(noRelatives)
+                .map(PassengerSpecifications::hasNoRelatives)
+                .map(spec::and)
+                .orElse(spec);
 
+        // Используем стандартный метод findAll для выполнения спецификаций
         Page<PassengerEntity> passengerPage = passengerRepository.findAll(spec, pageable);
-        List<PassengerEntityDto> dtoList = passengerPage.getContent().stream().map(this::convertToDto).collect(Collectors.toList());
+        List<PassengerEntityDto> dtoList = passengerPage.getContent().stream()
+                .map(passengerMapper::toDto)
+                .collect(Collectors.toList());
         return new PageImpl<>(dtoList, pageable, passengerPage.getTotalElements());
-    }
-
-    public List<PassengerEntityDto> searchPassengersByName(String name) {
-        return passengerRepository.findByNameContainingIgnoreCase(name, Pageable.unpaged())
-                .getContent().stream().map(this::convertToDto).collect(Collectors.toList());
     }
 
     public PassengerStatistics getPassengerStatistics(List<PassengerEntityDto> passengers) {
@@ -72,17 +89,10 @@ public class PassengerService {
                 .build();
     }
 
-    private PassengerEntityDto convertToDto(PassengerEntity passengerEntity) {
-        return PassengerEntityDto.builder()
-                .id(passengerEntity.getId())
-                .name(passengerEntity.getName())
-                .pClass(passengerEntity.getPClass())
-                .survived(passengerEntity.getSurvived())
-                .gender(passengerEntity.getGender())
-                .age(passengerEntity.getAge())
-                .siblingsSpousesAboard(passengerEntity.getSiblingsSpousesAboard())
-                .parentsChildrenAboard(passengerEntity.getParentsChildrenAboard())
-                .fare(passengerEntity.getFare())
-                .build();
+    public List<PassengerEntityDto> searchPassengersByName(String name) {
+        return passengerRepository.findByNameContainingIgnoreCase(name, Pageable.unpaged())
+                .getContent().stream()
+                .map(passengerMapper::toDto)
+                .collect(Collectors.toList());
     }
 }
