@@ -11,15 +11,18 @@ import java.util.concurrent.TimeUnit;
 @Configuration
 @EnableCaching
 public class CacheConfig {
+
     @Bean
     public CaffeineCacheManager cacheManager() {
         CaffeineCacheManager cacheManager = new CaffeineCacheManager();
         cacheManager.setCaffeine(caffeineCacheBuilder());
-        cacheManager.setCacheNames(List.of("passengers"));
+        // Убедитесь, что вы добавляете все необходимые имена кэшей
+        cacheManager.setCacheNames(List.of("passengerStatistics", "passengers"));
         return cacheManager;
     }
 
-    Caffeine<Object, Object> caffeineCacheBuilder() {
+    @Bean // Добавляем аннотацию @Bean, чтобы Spring мог управлять этим методом
+    public Caffeine<Object, Object> caffeineCacheBuilder() {
         return Caffeine.newBuilder()
                 .expireAfterAccess(30, TimeUnit.MINUTES)
                 .maximumSize(10000);
