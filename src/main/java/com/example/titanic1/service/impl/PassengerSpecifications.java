@@ -2,9 +2,6 @@ package com.example.titanic1.service.impl;
 
 import com.example.titanic1.model.entity.PassengerEntity;
 import com.example.titanic1.model.enums.Gender;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Root;
 import org.springframework.data.jpa.domain.Specification;
 
 public class PassengerSpecifications {
