@@ -7,6 +7,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Objects;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -21,4 +23,17 @@ public class PassengerEntityDto {
     private Integer siblingsSpousesAboard;
     private Integer parentsChildrenAboard;
     private Double fare;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof PassengerEntityDto)) return false;
+        PassengerEntityDto that = (PassengerEntityDto) o;
+        return Objects.equals(id, that.id); // Сравнение по id
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id); // Генерация hash-кода по id
+    }
 }
