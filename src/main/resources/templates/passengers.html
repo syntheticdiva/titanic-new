@@ -4,7 +4,7 @@
     <title>Список пассажиров Титаника</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </head>
 <body>
@@ -16,34 +16,38 @@
         <div class="form-row">
             <div class="form-group col-md-3">
                 <label for="name">Имя</label>
-                <input type="text" class="form-control" id="name" name="searchName" placeholder="Введите имя">
+                <input type="text" class="form-control" id="name" name="searchName" placeholder="Введите имя" th:value="${searchName}">
             </div>
             <div class="form-group col-md-3">
                 <label for="survived">Выживший</label>
                 <select class="form-control" id="survived" name="survived">
-                    <option value="">Все</option>
-                    <option value="true">Да</option>
-                    <option value="false">Нет</option>
+                    <option value="" th:selected="${survived == null}">Все</option>
+                    <option value="true" th:selected="${survived}">Да</option>
+                    <option value="false" th:selected="${survived == false}">Нет</option>
                 </select>
             </div>
             <div class="form-group col-md-3">
-                <label for="age">Возраст старше</label>
-                <input type="number" class="form-control" id="age" name="age" placeholder="Введите возраст">
+                <label for="adult">Совершеннолетний</label>
+                <select class="form-control" id="adult" name="adult">
+                    <option value="" th:selected="${adult == null}">Все</option>
+                    <option value="true" th:selected="${adult}">Да</option>
+                    <option value="false" th:selected="${adult == false}">Нет</option>
+                </select>
             </div>
             <div class="form-group col-md-3">
                 <label for="gender">Пол</label>
                 <select class="form-control" id="gender" name="gender">
-                    <option value="">Все</option>
-                    <option value="male">Мужской</option>
-                    <option value="female">Женский</option>
+                    <option value="" th:selected="${gender == null}">Все</option>
+                    <option value="male" th:selected="${gender == 'male'}">Мужской</option>
+                    <option value="female" th:selected="${gender == 'female'}">Женский</option>
                 </select>
             </div>
             <div class="form-group col-md-3">
                 <label for="hasRelatives">Без родственников</label>
                 <select class="form-control" id="hasRelatives" name="noRelatives">
-                    <option value="">Все</option>
-                    <option value="true">Да</option>
-                    <option value="false">Нет</option>
+                    <option value="" th:selected="${noRelatives == null}">Все</option>
+                    <option value="true" th:selected="${noRelatives}">Да</option>
+                    <option value="false" th:selected="${noRelatives == false}">Нет</option>
                 </select>
             </div>
         </div>
@@ -52,17 +56,28 @@
 
     <!-- Кнопка для фильтрации совершеннолетних пассажиров -->
     <form th:action="@{/passengers}" method="get" class="mb-4">
-        <input type="hidden" name="adult" value="1" /> <!-- Установлено значение 1 для фильтрации по возрасту -->
+        <input type="hidden" name="adult" value="true" />
         <button type="submit" class="btn btn-secondary">Показать всех совершеннолетних пассажиров</button>
-    </form>
+    </form><!-- Сортировка -->
+    <div class="mb-4">
+        <h5>Сортировать по:</h5>
+        <div class="btn-group" role="group">
+            <a class="btn btn-outline-secondary" th:href="@{/passengers(sortField='имя', sortDirection='asc', searchName=${searchName}, survived=${survived}, adult=${adult}, gender=${gender}, noRelatives=${noRelatives}, page=0, size=${size})}">Имя (A-Z)</a>
+            <a class="btn btn-outline-secondary" th:href="@{/passengers(sortField='имя', sortDirection='desc', searchName=${searchName}, survived=${survived}, adult=${adult}, gender=${gender}, noRelatives=${noRelatives}, page=0, size=${size})}">Имя (Z-A)</a>
+            <a class="btn btn-outline-secondary" th:href="@{/passengers(sortField='возраст', sortDirection='asc', searchName=${searchName}, survived=${survived}, adult=${adult}, gender=${gender}, noRelatives=${noRelatives}, page=0, size=${size})}">Возраст (возрастание)</a>
+            <a class="btn btn-outline-secondary" th:href="@{/passengers(sortField='возраст', sortDirection='desc', searchName=${searchName}, survived=${survived}, adult=${adult}, gender=${gender}, noRelatives=${noRelatives}, page=0, size=${size})}">Возраст (убывание)</a>
+            <a class="btn btn-outline-secondary" th:href="@{/passengers(sortField='оплата', sortDirection='asc', searchName=${searchName}, survived=${survived}, adult=${adult}, gender=${gender}, noRelatives=${noRelatives}, page=0, size=${size})}">Оплата (возрастание)</a>
+            <a class="btn btn-outline-secondary" th:href="@{/passengers(sortField='оплата', sortDirection='desc', searchName=${searchName}, survived=${survived}, adult=${adult}, gender=${gender}, noRelatives=${noRelatives}, page=0, size=${size})}">Оплата (убывание)</a>
+        </div>
+    </div>
 
     <!-- Таблица для отображения пассажиров -->
     <table class="table table-striped">
         <thead>
         <tr>
-            <th th:onclick="'sortByName()'">Имя</th>
-            <th th:onclick="'sortByAge()'">Возраст</th>
-            <th th:onclick="'sortByFare()'">Оплата</th>
+            <th>Имя</th>
+            <th>Возраст</th>
+            <th>Оплата</th>
             <th>Выживший</th>
             <th>Пол</th>
             <th>Родственники</th>
@@ -80,6 +95,11 @@
         </tbody>
     </table>
 
+    <!-- Сообщение о пустых результатах -->
+    <div th:if="${passengers.isEmpty()}" class="alert alert-warning">
+        Нет пассажиров, соответствующих критериям поиска.
+    </div>
+
     <!-- Статистика -->
     <div class="mt-4">
         <h3>Статистика</h3>
@@ -88,25 +108,160 @@
         <p>Количество людей с родственниками: <span th:text="${statistics.relativesCount}"></span></p>
     </div>
 
-    <!-- Пагинация -->
-    <nav aria-label="Page navigation">
-        <ul class="pagination">
-            <li class="page-item" th:class="${currentPage == 0} ? 'disabled'">
-                <a class="page-link" th:href="@{/passengers(page=${currentPage - 1}, size=${pageSize}, searchName=${searchName}, survived=${survived}, adult=${adult}, gender=${gender}, noRelatives=${noRelatives})}" aria-label="Previous">
-                    <span aria-hidden="true">&laquo;</span>
-                </a>
-            </li>
-            <li class="page-item" th:each="page : ${#numbers.sequence(0, totalPages - 1)}" th:class="${page == currentPage} ? 'active'">
-                <a class="page-link" th:href="@{/passengers(page=${page}, size=${pageSize}, searchName=${searchName}, survived=${survived}, adult=${adult}, gender=${gender}, noRelatives=${noRelatives})}" th:text="${page + 1}"></a>
-            </li>
-            <li class="page-item" th:class="${currentPage == totalPages - 1} ? 'disabled'">
-                <a class="page-link" th:href="@{/passengers(page=${currentPage + 1}, size=${pageSize}, searchName=${searchName}, survived=${survived}, adult=${adult}, gender=${gender}, noRelatives=${noRelatives})}" aria-label="Next">
-                    <span aria-hidden="true">&raquo;</span>
-                </a>
-            </li>
-        </ul>
-    </nav>
-</div>
-</body>
-</html>
+        <!-- Пагинация -->
+        <nav aria-label="Page navigation">
+            <ul class="pagination">
+                <li class="page-item" th:class="${currentPage == 0} ? 'disabled'">
+                    <a class="page-link" th:href="@{/passengers(page=${currentPage - 1}, size=${size}, sortField=${sortField}, sortDirection=${sortDirection}, searchName=${searchName}, survived=${survived}, adult=${adult}, gender=${gender}, noRelatives=${noRelatives})}" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+                <li class="page-item" th:each="page : ${#numbers.sequence(0, totalPages - 1)}" th:class="${page == currentPage} ? 'active'">
+                    <a class="page-link" th:href="@{/passengers(page=${page}, size=${size}, sortField=${sortField}, sortDirection=${sortDirection}, searchName=${searchName}, survived=${survived}, adult=${adult}, gender=${gender}, noRelatives=${noRelatives})}" th:text="${page + 1}"></a>
+                </li>
+                <li class="page-item" th:class="${currentPage == totalPages - 1} ? 'disabled'">
+                    <a class="page-link" th:href="@{/passengers(page=${currentPage + 1}, size=${size}, sortField=${sortField}, sortDirection=${sortDirection}, searchName=${searchName}, survived=${survived}, adult=${adult}, gender=${gender}, noRelatives=${noRelatives})}" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+    </body>
+    </html>
 
+<!--<!DOCTYPE html>-->
+<!--<html xmlns:th="http://www.thymeleaf.org">-->
+<!--<head>-->
+<!--    <title>Список пассажиров Титаника</title>-->
+<!--    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">-->
+<!--    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>-->
+<!--    <script src="cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>-->
+<!--    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>-->
+<!--</head>-->
+<!--<body>-->
+<!--<div class="container">-->
+<!--    <h1 class="mt-4">Список пассажиров Титаника</h1>-->
+
+<!--    &lt;!&ndash; Форма для фильтрации &ndash;&gt;-->
+<!--    <form th:action="@{/passengers}" method="get" class="mb-4">-->
+<!--        <div class="form-row">-->
+<!--            <div class="form-group col-md-3">-->
+<!--                <label for="name">Имя</label>-->
+<!--                <input type="text" class="form-control" id="name" name="searchName" placeholder="Введите имя" th:value="${searchName}">-->
+<!--            </div>-->
+<!--            <div class="form-group col-md-3">-->
+<!--                <label for="survived">Выживший</label>-->
+<!--                <select class="form-control" id="survived" name="survived">-->
+<!--                    <option value="" th:selected="${survived == null}">Все</option>-->
+<!--                    <option value="true" th:selected="${survived}">Да</option>-->
+<!--                    <option value="false" th:selected="${survived == false}">Нет</option>-->
+<!--                </select>-->
+<!--            </div>-->
+<!--            <div class="form-group col-md-3">-->
+<!--                <label for="adult">Совершеннолетний</label>-->
+<!--                <select class="form-control" id="adult" name="adult">-->
+<!--                    <option value="" th:selected="${adult == null}">Все</option>-->
+<!--                    <option value="true" th:selected="${adult}">Да</option>-->
+<!--                    <option value="false" th:selected="${adult == false}">Нет</option>-->
+<!--                </select>-->
+<!--            </div>-->
+<!--            <div class="form-group col-md-3">-->
+<!--                <label for="gender">Пол</label>-->
+<!--                <select class="form-control" id="gender" name="gender">-->
+<!--                    <option value="" th:selected="${gender == null}">Все</option>-->
+<!--                    <option value="male" th:selected="${gender == 'male'}">Мужской</option>-->
+<!--                    <option value="female" th:selected="${gender == 'female'}">Женский</option>-->
+<!--                </select>-->
+<!--            </div>-->
+<!--            <div class="form-group col-md-3">-->
+<!--                <label for="hasRelatives">Без родственников</label>-->
+<!--                <select class="form-control" id="hasRelatives" name="noRelatives">-->
+<!--                    <option value="" th:selected="${noRelatives == null}">Все</option>-->
+<!--                    <option value="true" th:selected="${noRelatives}">Да</option>-->
+<!--                    <option value="false" th:selected="${noRelatives == false}">Нет</option>-->
+<!--                </select>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--        <button type="submit" class="btn btn-primary">Фильтровать</button>-->
+<!--    </form>-->
+
+<!--    &lt;!&ndash; Кнопка для фильтрации совершеннолетних пассажиров &ndash;&gt;-->
+<!--    <form th:action="@{/passengers}" method="get" class="mb-4">-->
+<!--        <input type="hidden" name="adult" value="true" />-->
+<!--        <button type="submit" class="btn btn-secondary">Показать всех совершеннолетних пассажиров</button>-->
+<!--    </form>-->
+
+<!--    &lt;!&ndash; Сортировка &ndash;&gt;-->
+<!--    <div class="mb-4">-->
+<!--        <h5>Сортировать по:</h5>-->
+<!--        <div class="btn-group" role="group">-->
+<!--            <a class="btn btn-outline-secondary" th:href="@{/passengers(sortField='имя', sortDirection='asc', page=0, size=${size}, ${#mvc.addModelAttributes('searchName', searchName, 'survived', survived, 'adult', adult, 'gender', gender, 'noRelatives', noRelatives)})}"-->
+<!--               th:classappend="${sortField == 'имя' and sortDirection == 'asc'} ? 'active'">Имя (A-Z)</a>-->
+<!--            <a class="btn btn-outline-secondary" th:href="@{/passengers(sortField='имя', sortDirection='desc', page=0, size=${size}, ${#mvc.addModelAttributes('searchName', searchName, 'survived', survived, 'adult', adult, 'gender', gender, 'noRelatives', noRelatives)})}"-->
+<!--               th:classappend="${sortField == 'имя' and sortDirection == 'desc'} ? 'active'">Имя (Z-A)</a>-->
+<!--            <a class="btn btn-outline-secondary" th:href="@{/passengers(sortField='возраст', sortDirection='asc', searchName=${searchName}, survived=${survived}, adult=${adult}, gender=${gender}, noRelatives=${noRelatives}, page=0, size=${size})}">Возраст (возрастание)</a>-->
+<!--            <a class="btn btn-outline-secondary" th:href="@{/passengers(sortField='возраст', sortDirection='desc', searchName=${searchName}, survived=${survived}, adult=${adult}, gender=${gender}, noRelatives=${noRelatives}, page=0, size=${size})}">Возраст (убывание)</a>-->
+<!--            <a class="btn btn-outline-secondary" th:href="@{/passengers(sortField='оплата', sortDirection='asc', searchName=${searchName}, survived=${survived}, adult=${adult}, gender=${gender}, noRelatives=${noRelatives}, page=0, size=${size})}">Оплата (возрастание)</a>-->
+<!--            <a class="btn btn-outline-secondary" th:href="@{/passengers(sortField='оплата', sortDirection='desc', searchName=${searchName}, survived=${survived}, adult=${adult}, gender=${gender}, noRelatives=${noRelatives}, page=0, size=${size})}">Оплата (убывание)</a>-->
+<!--        </div>-->
+<!--    </div>-->
+
+<!--    &lt;!&ndash; Таблица для отображения пассажиров &ndash;&gt;-->
+<!--    <table class="table table-striped">-->
+<!--        <thead>-->
+<!--        <tr>-->
+<!--            <th>Имя</th>-->
+<!--            <th>Возраст</th>-->
+<!--            <th>Оплата</th>-->
+<!--            <th>Выживший</th>-->
+<!--            <th>Пол</th>-->
+<!--            <th>Родственники</th>-->
+<!--        </tr>-->
+<!--        </thead>-->
+<!--        <tbody>-->
+<!--        <tr th:each="passenger : ${passengers}">-->
+<!--            <td th:text="${passenger.name}"></td>-->
+<!--            <td th:text="${passenger.age}"></td>-->
+<!--            <td th:text="${passenger.fare}"></td>-->
+<!--            <td th:text="${passenger.survived ? 'Да' : 'Нет'}"></td>-->
+<!--            <td th:text="${passenger.gender}"></td>-->
+<!--            <td th:text="${passenger.siblingsSpousesAboard + passenger.parentsChildrenAboard}"></td>-->
+<!--        </tr>-->
+<!--        </tbody>-->
+<!--    </table>-->
+
+<!--    &lt;!&ndash; Сообщение о пустых результатах &ndash;&gt;-->
+<!--    <div th:if="${passengers.isEmpty()}" class="alert alert-warning">-->
+<!--        Нет пассажиров, соответствующих критериям поиска.-->
+<!--    </div>-->
+
+<!--    &lt;!&ndash; Статистика &ndash;&gt;-->
+<!--    <div class="mt-4">-->
+<!--        <h3>Статистика</h3>-->
+<!--        <p>Общая сумма оплаты: <span th:text="${statistics.totalFare}"></span></p>-->
+<!--        <p>Количество выживших: <span th:text="${statistics.survivorsCount}"></span></p>-->
+<!--        <p>Количество людей с родственниками: <span th:text="${statistics.relativesCount}"></span></p>-->
+<!--    </div>-->
+
+<!--    &lt;!&ndash; Пагинация &ndash;&gt;-->
+<!--    <nav aria-label="Page navigation">-->
+<!--        <ul class="pagination">-->
+<!--            <li class="page-item" th:class="${currentPage == 0} ? 'disabled'">-->
+<!--                <a class="page-link" th:href="@{/passengers(page=${currentPage - 1}, size=${size}, sortField=${sortField}, sortDirection=${sortDirection}, searchName=${searchName}, survived=${survived}, adult=${adult}, gender=${gender}, noRelatives=${noRelatives})}" aria-label="Previous">-->
+<!--                    <span aria-hidden="true">&laquo;</span>-->
+<!--                </a>-->
+<!--            </li>-->
+<!--            <li class="page-item" th:each="page : ${#numbers.sequence(0, totalPages - 1)}" th:class="${page == currentPage} ? 'active'">-->
+<!--                <a class="page-link" th:href="@{/passengers(page=${page}, size=${size}, sortField=${sortField}, sortDirection=${sortDirection}, searchName=${searchName}, survived=${survived}, adult=${adult}, gender=${gender}, noRelatives=${noRelatives})}" th:text="${page + 1}"></a>-->
+<!--            </li>-->
+<!--            <li class="page-item" th:class="${currentPage == totalPages - 1} ? 'disabled'">-->
+<!--                <a class="page-link" th:href="@{/passengers(page=${currentPage + 1}, size=${size}, sortField=${sortField}, sortDirection=${sortDirection}, searchName=${searchName}, survived=${survived}, adult=${adult}, gender=${gender}, noRelatives=${noRelatives})}" aria-label="Next">-->
+<!--                    <span aria-hidden="true">&raquo;</span>-->
+<!--                </a>-->
+<!--            </li>-->
+<!--        </ul>-->
+<!--    </nav>-->
+<!--</div>-->
+<!--</body>-->
+<!--</html>-->
