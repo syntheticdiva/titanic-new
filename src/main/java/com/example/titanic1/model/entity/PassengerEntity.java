@@ -55,11 +55,13 @@ public class PassengerEntity {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         PassengerEntity passenger = (PassengerEntity) o;
-        return Objects.equals(id, passenger.id);
+        return Objects.equals(id, passenger.id) &&
+                Objects.equals(name, passenger.name) &&
+                Objects.equals(fare, passenger.fare); // Сравнение по id, name и fare
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return Objects.hash(id, name, fare); // Генерация hash-кода по id, name и fare
     }
 }

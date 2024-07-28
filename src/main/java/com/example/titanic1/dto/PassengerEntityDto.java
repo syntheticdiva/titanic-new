@@ -29,11 +29,13 @@ public class PassengerEntityDto {
         if (this == o) return true;
         if (!(o instanceof PassengerEntityDto)) return false;
         PassengerEntityDto that = (PassengerEntityDto) o;
-        return Objects.equals(id, that.id); // Сравнение по id
+        return Objects.equals(id, that.id) &&
+                Objects.equals(name, that.name) &&
+                Objects.equals(fare, that.fare); // Сравнение по id, name и fare
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id); // Генерация hash-кода по id
+        return Objects.hash(id, name, fare); // Генерация hash-кода по id, name и fare
     }
 }
