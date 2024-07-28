@@ -15,7 +15,19 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Repository
-public interface PassengerRepository extends JpaRepository<PassengerEntity, Long>, JpaSpecificationExecutor<PassengerEntity> {
+public interface PassengerRepository extends JpaRepository<PassengerEntity, Long> {
+    List<PassengerEntity> findByNameContainingIgnoreCase(String name);
 
-    Page<PassengerEntity> findByNameContainingIgnoreCase(String name, Pageable pageable);}
+    @Query("SELECT p FROM PassengerEntity p WHERE p.survived = true")
+    List<PassengerEntity> findAllSurvivors();
+
+    @Query("SELECT p FROM PassengerEntity p WHERE p.age > 16")
+    List<PassengerEntity> findAllAdults();
+
+    @Query("SELECT p FROM PassengerEntity p WHERE p.gender = :gender")
+    List<PassengerEntity> findAllByGender(@Param("gender") Gender gender);
+
+    @Query("SELECT p FROM PassengerEntity p WHERE p.siblingsSpousesAboard = 0")
+    List<PassengerEntity> findAllWithoutRelatives();
+
+    }
