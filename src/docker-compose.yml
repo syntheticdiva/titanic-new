@@ -1,0 +1,12 @@
+version: '3.8'
+services:
+
+  titanic-db:
+    image: postgres:13
+    container_name: titanic_db
+    ports:
+      - "5433:5432"
+    environment:
+      - POSTGRES_DB=titanic
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=111
