@@ -15,6 +15,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.stream.Collectors;
 
+
 public interface PassengerRepository extends JpaRepository<PassengerEntity, Long> {
     List<PassengerEntity> findByNameContainingIgnoreCase(String name);
 
@@ -30,4 +31,5 @@ public interface PassengerRepository extends JpaRepository<PassengerEntity, Long
     @Query("SELECT p FROM PassengerEntity p WHERE p.siblingsSpousesAboard = 0")
     List<PassengerEntity> findAllWithoutRelatives();
 
-    }
+    Page<PassengerEntity> findAll(Specification<PassengerEntity> spec, Pageable sortedPageable);
+}
